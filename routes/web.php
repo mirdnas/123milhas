@@ -2,6 +2,9 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -14,7 +17,9 @@
 */
 
 $router->get('/', function () use ($router) {
-    $variavel = ['nome'=>'joao','idade'=>25];
-
-    return json_encode($variavel);
+    $url = 'http://prova.123milhas.net/api/flights';
+    $client = new Client();
+    $response = $client->get($url);
+    $body = $response->getBody();
+    echo $body;
 });
