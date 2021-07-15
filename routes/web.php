@@ -30,61 +30,51 @@ $router->get('/', function () use ($router) {
 	}
 
 	$groups = [];
-
+	$fareSeparation = [];
 	foreach ($flights as $key => $value) {
 
+		$fareSeparation[$value['fare']]['uniqueId'] = uniqid();
 
-		if(empty($totalPriceGroup[$value['fare']])) {
-			$totalPriceGroup[$value['fare']] = 0;
+		if(empty( $fareSeparation[$value['fare']]['totalPrice'] )) {
+			$fareSeparation[$value['fare']]['totalPrice'] = 0;
 		}
-		$totalPriceGroup[$value['fare']] = $totalPriceGroup[$value['fare']] + $value['price'];
+		$fareSeparation[$value['fare']]['totalPrice'] = $fareSeparation[$value['fare']]['totalPrice'] + $value['price'];
 
-		if($value['outbound']) $outbound[] = $value;
-		if($value['inbound']) $inboundoutbound[] = $value;
-
-		if(!empty($totalGroups[$value['fare']])){
-			$totalGroups[$value['fare']] = $totalGroups[$value['fare']] + 1;
-		}else {
-			$totalGroups[$value['fare']] = 1;
+		if($value['outbound']){
+			$fareSeparation[$value['fare']]['outbound'][] = $value;
 		}
 
+		if($value['inbound']){
+			$fareSeparation[$value['fare']]['inbound'][] = $value;
+		}
 
-		$groups[$value['fare']][] = [
-			'uniqueId' => $key,
-			'totalPrice' => $totalPriceGroup[$value['fare']],
-			'outbound' => $outbound,
-			'inbound' => $inbound,
-			'totalGroups' => $totalGroups,
-			'totalFlights' => 7, //quantidade total de voos unicos
-			'cheapestPrice' => 342.88, //preco do grupo mais barato
-			'cheapestGroup' => 4858, //id unido do grupo mais barato
-		];
-		//dd('key', $key, 'value', $value);
 	}
 
-	dd( 'groups', $groups );
+	$totalGroups = count($fareSeparation);
+	$cheapestPrice = 0;
+	$cheapestGroup = '';
+
+	foreach ($fareSeparation as $key => $value) {
+		$groups[] = $value;
+		if(empty($cheapestPrice)){
+			$cheapestPrice = $value['totalPrice'];
+			$cheapestGroup = $value['uniqueId'];
+		}
+
+		if( $value['totalPrice'] < $cheapestPrice ) {
+			$cheapestPrice = $value['totalPrice'];
+			$cheapestGroup = $value['uniqueId'];
+		}
+
+ 	}
 
 	$jsonRetorno = [
 		'flights' => $flights, //voos da api
-		'groups' => [
-			$groups
-			// [
-			// 	'uniqueId' => 123, //id unico do grupo
-			// 	'totalPrice' => 482.00, //preco total do grupo
-			// 	'outbound' => [
-			// 		['id' => 1, 'voo' => 'ida 1'],
-			// 		['id' => 2, 'voo' => 'ida 2'],
-			// 	], //voos de ida
-			// 	'inbound' => [
-			// 		['id' => 1, 'voo' => 'volta 1'],
-			// 		['id' => 2, 'voo' => 'volta 2'],
-			// 	], // voos de volta
-			// 	'totalGroups'=> 2, //quantidade total de grupos
-			// 	'totalFlights' => 7, //quantidade total de voos unicos
-			// 	'cheapestPrice' => 342.88, //preco do grupo mais barato
-			// 	'cheapestGroup' => 4858, //id unido do grupo mais barato
-			// ]
-		],
+		'groups' => $groups ,
+		'totalGroups'=> $totalGroups, //quantidade total de grupos
+		'totalFlights' => count($flights), //quantidade total de voos unicos
+		'cheapestPrice' => $cheapestPrice, //preco do grupo mais barato
+		'cheapestGroup' => $cheapestGroup, //id unido do grupo mais barato
 	];
 
 	return json_encode($jsonRetorno);
