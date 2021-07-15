@@ -30,6 +30,29 @@ $router->get('/', function () use ($router) {
 		$flights = Cache::get('flights');
 	}
 
+	$jsonRetorno = [
+		'flights' => $flights, //voos da api
+		'groups' => [
+			[
+				'uniqueId' => 123, //id unico do grupo
+				'totalPrice' => 482.00, //preco total do grupo
+				'outbound' => [
+					['id' => 1, 'voo' => 'ida 1'],
+					['id' => 2, 'voo' => 'ida 2'],
+				], //voos de ida
+				'inbound' => [
+					['id' => 1, 'voo' => 'volta 1'],
+					['id' => 2, 'voo' => 'volta 2'],
+				], // voos de volta
+				'totalGroups'=> 2, //quantidade total de grupos
+				'totalFlights' => 7, //quantidade total de voos unicos
+				'cheapestPrice' => 342.88, //preco do grupo mais barato
+				'cheapestGroup' => 4858, //id unido do grupo mais barato
+			]
+		],
+	];
+
+	return json_encode($jsonRetorno);
 
 
 });
