@@ -4,6 +4,7 @@
 
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Cache;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,9 +18,18 @@ use GuzzleHttp\Client;
 */
 
 $router->get('/', function () use ($router) {
-    $url = 'http://prova.123milhas.net/api/flights';
-    $client = new Client();
-    $response = $client->get($url);
-    $body = $response->getBody();
-    echo $body;
+
+
+	if (!Cache::has('flights')) {
+		$url = 'http://prova.123milhas.net/api/flights';
+		$client = new Client();
+		$response = $client->get($url);
+		$body = $response->getBody();
+		$flights = Cache::put('flights', $body);
+	}else {
+		$flights = Cache::get('flights');
+	}
+
+
+
 });
